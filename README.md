@@ -229,7 +229,7 @@ pipeline {
                 sh "trivy image --format table -o image-report.html premd91/bankapp:latest"
             }
         }
-        stage('Push Docker Image') {
+        stage('Push Docker Image')  {
             steps {
                 script {
                     withDockerRegistry(credentialsId: 'docker-cred') {
