@@ -16,8 +16,8 @@ spec:
         app: mysql
     spec:
       containers:
-      - image: mysql:8
-        name: mysql
+      - name: mysql
+        image: mysql:8
         env:
         - name: MYSQL_ROOT_PASSWORD
           value: "Test@123"
@@ -27,18 +27,21 @@ spec:
         - containerPort: 3306
           name: mysql
 ---
-# MySQL Service
+# MySQL Service (ClusterIP - internal communication)
 apiVersion: v1
 kind: Service
 metadata:
   name: mysql-service
 spec:
-  ports:
-  - port: 3306
   selector:
     app: mysql
+  ports:
+  - name: mysql
+    port: 3306
+    targetPort: 3306
+  type: ClusterIP
 ---
-# Java Application Deployment
+# Spring Boot (BankApp) Deployment
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -66,15 +69,16 @@ spec:
         - name: SPRING_DATASOURCE_PASSWORD
           value: Test@123
 ---
-# Bank Application Service
+# BankApp Service (exposed externally)
 apiVersion: v1
 kind: Service
 metadata:
   name: bankapp-service
 spec:
-  type: LoadBalancer
-  ports:
-  - port: 80
-    targetPort: 8080
   selector:
     app: bankapp
+  type: LoadBalancer
+  ports:
+  - name: http
+    port: 80
+    targetPort: 8080
